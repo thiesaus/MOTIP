@@ -1,0 +1,47 @@
+SUPER_CONFIG_PATH: ./configs/r50_deformable_detr_motip_dancetrack.yaml
+
+# Datasets:
+DATA_ROOT: F:\thesis\refer-kitti    # datasets root
+# Sampling settings:
+SAMPLE_STEPS: [60,80,90]
+SAMPLE_LENGTHS: [20,20,20,20]
+SAMPLE_MODE: random_interval
+SAMPLE_INTERVALS: 4
+
+DATASETS: [refer-kitti]
+# DATASET_SPLITS: [train] # [train, val] or [train] ???
+DATASET_WEIGHTS: [1]
+SAMPLE_INTERVAL: 1
+MAX_TEMPORAL_LENGTH: 20
+
+AUG_MAX_SIZE: 1536
+AUG_RESIZE_SCALES: [608, 640, 672, 704, 736, 768, 800, 832, 864, 896, 928, 960, 992]
+
+INFERENCE_DATASET:
+INFERENCE_SPLIT:
+INFERENCE_MAX_SIZE: 1536
+
+DET_THRESH: 0.5
+NEWBORN_THRESH: 0.5
+ID_THRESH: 0.02
+
+DETR_PRETRAIN: ./pretrains/r50_deformable_detr_motip_mot17.pth
+RESUME_MODEL: 
+RESUME_OPTIMIZER: False # True
+RESUME_SCHEDULER: Falses # True
+RESUME_STATES: False # True
+
+EPOCHS: 45
+SCHEDULER_MILESTONES: [30, 40, ]
+LR_WARMUP_EPOCHS: 2
+
+NUM_ID_VOCABULARY: 200
+TRAINING_NUM_ID: 80
+
+RMOT_PATH: F:\thesis\refer-kitti
+DATA_TXT_PATH_TRAIN: data/ref_kitti_data_path/refer-kitti.train
+DETR_SET_COST_REFER: 2
+DETR_FRAMEWORK: Deformable-DETR
+VIS:
+
+# RUN: python main.py --mode train_ref_kitti --config-path ./configs/r50_deformable_detr_motip_refkitti.yaml --data-root "F:\thesis\refer-kitti" --use-wandb False

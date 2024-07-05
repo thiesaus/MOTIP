@@ -4,9 +4,9 @@ MODE:       # "train" or "eval" or "submit", for the main.py script.
 
 # System config, like CPU/GPU
 NUM_CPU_PER_GPU:          # number of CPU per GPU
-NUM_WORKERS: 6
+NUM_WORKERS: 0
 DEVICE: cuda
-AVAILABLE_GPUS: 0,1,2,3,4,5,6,7
+AVAILABLE_GPUS: 0,
 
 # Git version:
 GIT_VERSION:              # you should input the git version here, if you are using wandb to log your experiments.
@@ -63,7 +63,7 @@ DETR_CLS_LOSS_COEF: 2.0
 DETR_BBOX_LOSS_COEF: 5.0
 DETR_GIOU_LOSS_COEF: 2.0
 DETR_FOCAL_ALPHA: 0.25
-DETR_PRETRAIN: ./pretrains/r50_deformable_detr_coco_dancetrack.pth
+DETR_PRETRAIN: # ./pretrains/r50_dab_deformable_detr_motip_dancetrack.pth # ./pretrains/r50_deformable_detr_coco_dancetrack.pth
 DETR_FRAMEWORK: Deformable-DETR
 
 # Training Setting:
@@ -92,13 +92,13 @@ SCHEDULER_MILESTONES: [8, 12]
 SCHEDULER_GAMMA: 0.1
 BATCH_SIZE: 1
 ACCUMULATE_STEPS: 2
-RESUME_MODEL:
-RESUME_OPTIMIZER: True
-RESUME_SCHEDULER: True
-RESUME_STATES: True
+RESUME_MODEL: ./pretrains/r50_dab_deformable_detr_motip_dancetrack.pth
+RESUME_OPTIMIZER: False # True
+RESUME_SCHEDULER: Falses # True
+RESUME_STATES: False # True
 
 # Inference:
-INFERENCE_MODEL:
+INFERENCE_MODEL: ./pretrains/r50_dab_deformable_detr_motip_dancetrack.pth
 INFERENCE_ONLY_DETR: False
 INFERENCE_DATASET: DanceTrack
 INFERENCE_SPLIT: val

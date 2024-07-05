@@ -1,7 +1,7 @@
 SUPER_CONFIG_PATH: ./configs/r50_deformable_detr_motip_dancetrack.yaml
 
 DETR_FRAMEWORK: DAB-Deformable-DETR
-DETR_PRETRAIN: ./pretrains/r50_dab_deformable_detr_coco_dancetrack.pth
+DETR_PRETRAIN: # ./pretrains/r50_dab_deformable_detr_motip_dancetrack.pth
 
 # Different dimension settings for DAB DETR:
 DETR_HIDDEN_DIM: 256
