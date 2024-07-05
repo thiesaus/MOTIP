@@ -10,6 +10,7 @@ from train_engine import train
 from eval_engine import evaluate
 from submit_engine import submit
 
+from modified_train_engine import train as train_ref_kitti
 
 def parse_option():
     """
@@ -131,6 +132,11 @@ def main(config: dict):
 
     if config["MODE"] == "train":
         log_dir = os.path.join(config["OUTPUTS_DIR"], config["MODE"])
+
+    # add prompt (log)
+    elif config["MODE"] == "train_ref_kitti":
+        log_dir = os.path.join(config["OUTPUTS_DIR"], config["MODE"])
+        
     elif config["MODE"] == "eval":
         log_dir = os.path.join(config["OUTPUTS_DIR"], config["MODE"],
                                config["INFERENCE_GROUP"] if config["INFERENCE_GROUP"] is not None else "default",
@@ -168,6 +174,8 @@ def main(config: dict):
         evaluate(config=config, logger=logger)
     elif config["MODE"] == "submit":
         submit(config=config, logger=logger)
+    elif config["MODE"] == "train_ref_kitti":
+        train_ref_kitti(config=config, logger=logger)
     return
 
 
@@ -182,3 +190,5 @@ if __name__ == '__main__':
 
     # Then, update configs by runtime options, using the different runtime setting.
     main(config=update_config(config=cfg, option=opt))
+
+# python main.py --mode train_ref_kitti --config-path ./configs/r50_deformable_detr_motip_refkitti.yaml --data-root "F:\thesis\refer-kitti" --use-wandb False

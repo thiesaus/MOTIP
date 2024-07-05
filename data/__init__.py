@@ -19,10 +19,13 @@ from torch.utils.data import RandomSampler, SequentialSampler, DataLoader
 
 from utils.utils import is_distributed
 from .mot_dataset import build as build_mot_dataset
-from .utils import collate_fn
+from .refer_kitti import build as build_ref_kitti
+from .utils import collate_fn, collate_fn_ref_kitti
 
 
 def build_dataset(config: dict):
+    # TODO; image_set
+    return build_ref_kitti(image_set="train", args=config)
     return build_mot_dataset(config=config)
 
 
@@ -40,6 +43,6 @@ def build_dataloader(dataset, sampler, batch_size: int, num_workers: int):
         batch_size=batch_size,
         sampler=sampler,
         num_workers=num_workers,
-        collate_fn=collate_fn,
+        collate_fn=collate_fn_ref_kitti, # collate_fn
         pin_memory=True
     )

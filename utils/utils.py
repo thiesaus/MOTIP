@@ -174,6 +174,8 @@ def combine_detr_outputs(detr_outputs1, detr_outputs2):
     combined_outputs = dict()
     combined_outputs["pred_logits"] = torch.cat([detr_outputs1["pred_logits"], detr_outputs2["pred_logits"]], dim=0)
     combined_outputs["pred_boxes"] = torch.cat([detr_outputs1["pred_boxes"], detr_outputs2["pred_boxes"]], dim=0)
+    # add prompt
+    combined_outputs["pred_refers"] = torch.cat([detr_outputs1["pred_refers"], detr_outputs2["pred_refers"]], dim=0)
     combined_outputs["outputs"] = torch.cat([detr_outputs1["outputs"], detr_outputs2["outputs"]], dim=0)
     combined_outputs["aux_outputs"] = [
         {
@@ -187,6 +189,11 @@ def combine_detr_outputs(detr_outputs1, detr_outputs2):
                 detr_outputs2["aux_outputs"][_]["pred_boxes"]],
                 dim=0
             ),
+            "pred_refers": torch.cat([
+                detr_outputs1["aux_outputs"][_]["pred_refers"],
+                detr_outputs2["aux_outputs"][_]["pred_refers"]],
+                dim=0
+            )
         }
         for _ in range(len(detr_outputs1["aux_outputs"]))
     ]
@@ -227,6 +234,9 @@ def combine_detr_outputs(detr_outputs1, detr_outputs2):
             ),
             "pred_boxes": torch.cat(
                 [detr_outputs1["interm_outputs"]["pred_boxes"], detr_outputs2["interm_outputs"]["pred_boxes"]], dim=0
+            ),
+            "pred_refers": torch.cat(
+                [detr_outputs1["interm_outputs"]["pred_refers"], detr_outputs2["interm_outputs"]["pred_refers"]], dim=0
             )
         }
         combined_outputs["interm_outputs_for_matching_pre"] = {
@@ -235,6 +245,9 @@ def combine_detr_outputs(detr_outputs1, detr_outputs2):
             ),
             "pred_boxes": torch.cat(
                 [detr_outputs1["interm_outputs_for_matching_pre"]["pred_boxes"], detr_outputs2["interm_outputs_for_matching_pre"]["pred_boxes"]], dim=0
+            ),
+            "pred_refers": torch.cat(
+                [detr_outputs1["interm_outputs_for_matching_pre"]["pred_refers"], detr_outputs2["interm_outputs_for_matching_pre"]["pred_refers"]], dim=0
             )
         }
     return combined_outputs
@@ -244,11 +257,14 @@ def detr_outputs_index_select(detr_outputs, index, dim: int = 0):
     selected_detr_outputs = dict()
     selected_detr_outputs["pred_logits"] = torch.index_select(detr_outputs["pred_logits"], index=index, dim=dim).contiguous()
     selected_detr_outputs["pred_boxes"] = torch.index_select(detr_outputs["pred_boxes"], index=index, dim=dim).contiguous()
+    # add prompt
+    selected_detr_outputs["pred_refers"] = torch.index_select(detr_outputs["pred_refers"], index=index, dim=dim).contiguous()
     selected_detr_outputs["outputs"] = torch.index_select(detr_outputs["outputs"], index=index, dim=dim).contiguous()
     selected_detr_outputs["aux_outputs"] = [
         {
             "pred_logits": torch.index_select(detr_outputs["aux_outputs"][_]["pred_logits"], index=index, dim=dim).contiguous(),
             "pred_boxes": torch.index_select(detr_outputs["aux_outputs"][_]["pred_boxes"], index=index, dim=dim).contiguous(),
+            "pred_refers": torch.index_select(detr_outputs["aux_outputs"][_]["pred_refers"], index=index, dim=dim).contiguous(),
         }
         for _ in range(len(detr_outputs["aux_outputs"]))
     ]
@@ -272,11 +288,13 @@ def detr_outputs_index_select(detr_outputs, index, dim: int = 0):
     if "interm_outputs" in detr_outputs:
         selected_detr_outputs["interm_outputs"] = {
             "pred_logits": torch.index_select(detr_outputs["interm_outputs"]["pred_logits"], index=index, dim=dim).contiguous(),
-            "pred_boxes": torch.index_select(detr_outputs["interm_outputs"]["pred_boxes"], index=index, dim=dim).contiguous()
+            "pred_boxes": torch.index_select(detr_outputs["interm_outputs"]["pred_boxes"], index=index, dim=dim).contiguous(),
+            "pred_refers": torch.index_select(detr_outputs["interm_outputs"]["pred_refers"], index=index, dim=dim).contiguous()
         }
         selected_detr_outputs["interm_outputs_for_matching_pre"] = {
             "pred_logits": torch.index_select(detr_outputs["interm_outputs_for_matching_pre"]["pred_logits"], index=index, dim=dim).contiguous(),
-            "pred_boxes": torch.index_select(detr_outputs["interm_outputs_for_matching_pre"]["pred_boxes"], index=index, dim=dim).contiguous()
+            "pred_boxes": torch.index_select(detr_outputs["interm_outputs_for_matching_pre"]["pred_boxes"], index=index, dim=dim).contiguous(),
+            "pred_refers": torch.index_select(detr_outputs["interm_outputs_for_matching_pre"]["pred_refers"], index=index, dim=dim).contiguous()
         }
     return selected_detr_outputs
 

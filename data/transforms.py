@@ -175,6 +175,67 @@ class MultiRandomCrop:
             return images, uncropped_infos
         # return zip(*[crop(image, info, ijhw=crop_ijhw) for image, info in zip(images, infos)])
 
+# from RMOT
+def crop_mot(image, target, region):
+    cropped_image = F.crop(image, *region)
+
+    target = target.copy()
+    i, j, h, w = region
+
+    # should we do something wrt the original size?
+    target["size"] = torch.tensor([h, w])
+
+    fields = ["labels", "area", "iscrowd", "obj_ids"]
+
+    if 'is_ref' in target:
+        fields.append('is_ref')
+
+    if "boxes" in target:
+        boxes = target["boxes"]
+        cropped_boxes = boxes - torch.as_tensor([j, i, j, i])
+        target["boxes"] = cropped_boxes.reshape(-1, 4)
+        fields.append("boxes")
+
+    if "masks" in target:
+        # FIXME should we update the area here if there are no boxes?
+        target['masks'] = target['masks'][:, i:i + h, j:j + w]
+        fields.append("masks")
+
+    # remove elements for which the boxes or masks that have zero area
+    if "boxes" in target or "masks" in target:
+        # favor boxes selection when defining which elements to keep
+        # this is compatible with previous implementation
+        if "boxes" in target:
+            cropped_boxes = target['boxes'].reshape(-1, 2, 2)
+            max_size = torch.as_tensor([w, h], dtype=torch.float32)
+            cropped_boxes = torch.min(cropped_boxes.reshape(-1, 2, 2), max_size)
+            cropped_boxes = cropped_boxes.clamp(min=0)
+            keep = torch.all(cropped_boxes[:, 1, :] > cropped_boxes[:, 0, :], dim=1)
+        else:
+            keep = target['masks'].flatten(1).any(1)
+
+        for field in fields:
+            target[field] = target[field][keep]
+
+    return cropped_image, target
+
+
+class FixedMultiRandomCrop(object):
+    def __init__(self, min_size: int, max_size: int):
+        self.min_size = min_size
+        self.max_size = max_size
+
+    def __call__(self, imgs: list, targets: list):
+        ret_imgs = []
+        ret_targets = []
+        w = random.randint(self.min_size, min(imgs[0].width, self.max_size))
+        h = random.randint(self.min_size, min(imgs[0].height, self.max_size))
+        region = T.RandomCrop.get_params(imgs[0], [h, w])
+        for img_i, targets_i in zip(imgs, targets):
+            img_i, targets_i = crop_mot(img_i, targets_i, region)
+            ret_imgs.append(img_i)
+            ret_targets.append(targets_i)
+        return ret_imgs, ret_targets
 
 class MultiRandomShift:
     def __init__(self, max_shift_ratio: float = 0.05, overflow_bbox: bool = False):

@@ -75,13 +75,18 @@ def load_checkpoint(model: nn.Module, path: str, states: dict = None,
     return
 
 
-def load_detr_pretrain(model: nn.Module, pretrain_path: str, num_classes: int):
+def load_detr_pretrain(model: nn.Module, pretrain_path: str, num_classes: int, is_motip_pretrain: False):
     pretrain_model = torch.load(pretrain_path, map_location=lambda storage, loc: storage)
     pretrain_state_dict = pretrain_model["model"]
     detr_state_dict = dict()
     model_state_dict = model.state_dict()
-    for k, v in pretrain_state_dict.items():
-        detr_state_dict["detr."+k] = v
+    
+    if is_motip_pretrain:
+        for k, v in pretrain_state_dict.items():
+            detr_state_dict[k] = v
+    else:    
+        for k, v in pretrain_state_dict.items():
+            detr_state_dict["detr."+k] = v
     # 对 Class Head 进行调整，找到匹配的 cls head parameters:
     for k, v in detr_state_dict.items():
         if "class_embed" in k:
