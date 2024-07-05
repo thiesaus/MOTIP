@@ -352,7 +352,7 @@ class SetCriterion(nn.Module):
         indices = filtered_idx
         idx = self._get_src_permutation_idx(indices)
         src_refs = outputs['pred_refers'][idx]
-        target_refs = torch.cat([gt_per_img.is_ref[i] for gt_per_img, (_, i) in zip(targets, indices)], dim=0)
+        target_refs = torch.cat([gt_per_img["is_ref"][i] for gt_per_img, (_, i) in zip(targets, indices)], dim=0)
         gt_labels_target = target_refs.view(src_refs.size()[0], src_refs.size()[1])
 
         if self.focal_loss:
