@@ -50,12 +50,13 @@ class MOTIP(nn.Module):
         self.detr_cls_loss_coef = config["DETR_CLS_LOSS_COEF"]
         self.detr_bbox_loss_coef = config["DETR_BBOX_LOSS_COEF"]
         self.detr_giou_loss_coef = config["DETR_GIOU_LOSS_COEF"]
+        # add prompt
+        self.detr_refer_loss_coef = config["DETR_REFER_LOSSS_COEF"]
+
         self.detr_set_cost_class = config["DETR_CLS_LOSS_COEF"] if "DETR_SET_COST_CLASS" not in config else config["DETR_SET_COST_CLASS"]
         self.detr_set_cost_bbox = config["DETR_BBOX_LOSS_COEF"] if "DETR_SET_COST_BBOX" not in config else config["DETR_SET_COST_BBOX"]
         self.detr_set_cost_giou = config["DETR_GIOU_LOSS_COEF"] if "DETR_SET_COST_GIOU" not in config else config["DETR_SET_COST_GIOU"]
         self.detr_focal_alpha = config["DETR_FOCAL_ALPHA"]
-        # add prompt
-        self.detr_set_cost_refer = config["DETR_SET_COST_REFER"]
         self.device = config["DEVICE"]
 
         self.only_detr = config["TRAIN_STAGE"] == "only_detr"
@@ -87,7 +88,7 @@ class MOTIP(nn.Module):
         detr_args.giou_loss_coef = self.detr_giou_loss_coef
         detr_args.focal_alpha = self.detr_focal_alpha
         # add prompt
-        detr_args.refer_loss_coef = self.detr_set_cost_refer
+        detr_args.refer_loss_coef = self.detr_refer_loss_coef
         # Three hack implementation:
         detr_args.set_cost_class = self.detr_set_cost_class
         detr_args.set_cost_bbox = self.detr_set_cost_bbox
