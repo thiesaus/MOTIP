@@ -147,7 +147,7 @@ class DeformableDETR(nn.Module):
             nn.init.constant_(self.bbox_embed.layers[-1].bias.data[2:], -2.0)
             self.class_embed = nn.ModuleList([self.class_embed for _ in range(num_pred)])
             self.bbox_embed = nn.ModuleList([self.bbox_embed for _ in range(num_pred)])
-            self.refer_embed = _get_clones(self.refer_embed, num_pred)
+            self.refer_embed = nn.ModuleList([self.refer_embed for _ in range(num_pred)])
             self.transformer.decoder.bbox_embed = None
         if two_stage:
             # hack implementation for two-stage
@@ -242,8 +242,6 @@ class DeformableDETR(nn.Module):
                 masks.append(mask)
                 pos.append(pos_l)
 
-        import pdb; pdb.set_trace()
-
         query_embeds = None
         if not self.two_stage:
             query_embeds = self.query_embed.weight
@@ -273,6 +271,7 @@ class DeformableDETR(nn.Module):
 
         outputs_class = torch.stack(outputs_classes)
         outputs_coord = torch.stack(outputs_coords)
+        outputs_refer = torch.stack(outputs_refers)
 
         out = {'pred_logits': outputs_class[-1], 'pred_boxes': outputs_coord[-1], 'pred_refers': outputs_refer[-1]}
         if self.aux_loss:
@@ -302,7 +301,7 @@ class SetCriterion(nn.Module):
         1) we compute hungarian assignment between ground truth boxes and the outputs of the model
         2) we supervise each pair of matched ground-truth / prediction (supervise class and box)
     """
-    def __init__(self, num_classes, matcher, weight_dict, losses, focal_alpha=0.25):
+    def __init__(self, num_classes, matcher, weight_dict, losses, focal_alpha=0.25, focal_loss=True):
         """ Create the criterion.
         Parameters:
             num_classes: number of object categories, omitting the special no-object category
@@ -317,6 +316,7 @@ class SetCriterion(nn.Module):
         self.weight_dict = weight_dict
         self.losses = losses
         self.focal_alpha = focal_alpha
+        self.focal_loss = focal_loss
 
     def loss_labels(self, outputs, targets, indices, num_boxes, log=True):
         """Classification loss (NLL)
@@ -459,6 +459,10 @@ class SetCriterion(nn.Module):
         """ This performs the loss computation.
         Parameters:
              outputs: dict of tensors, see the output specification of the model for the format
+                current attributes:
+                    + pred_logits: Tensor[batch_size, num_queries, num_classes+1]
+                    + pred_boxes: Tensor[batch_size, num_queries, 4]
+                    + pred_refers: Tensor[batch_size, num_queries, 1]
              targets: list of dicts, such that len(targets) == batch_size.
                       The expected keys in each dict depends on the losses applied, see each loss' doc
         """
