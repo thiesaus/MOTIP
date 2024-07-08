@@ -130,6 +130,14 @@ class Instances:
                 v = v.to(*args, **kwargs)
             ret.set(k, v)
         return ret
+    
+    def numpy(self):
+        ret = Instances(self._image_size)
+        for k, v in self._fields.items():
+            if hasattr(v, "numpy"):
+                v = v.numpy()
+            ret.set(k, v)
+        return ret
 
     def __getitem__(self, item: Union[int, slice, torch.BoolTensor]) -> "Instances":
         """
