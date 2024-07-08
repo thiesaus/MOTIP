@@ -5,8 +5,9 @@ DATA_ROOT: F:\thesis\refer-kitti    # datasets root
 # Sampling settings:
 SAMPLE_STEPS: [60,80,90]
 SAMPLE_LENGTHS: [20,20,20,20]
+# SAMPLE_LENGTHS: [2,2,2,2]
 SAMPLE_MODE: random_interval
-SAMPLE_INTERVALS: 4
+SAMPLE_INTERVALS: 4 # 1
 
 DATASETS: [refer-kitti]
 # DATASET_SPLITS: [train] # [train, val] or [train] ???
@@ -28,8 +29,10 @@ ID_THRESH: 0.02
 DETR_PRETRAIN: ./pretrains/r50_deformable_detr_motip_mot17.pth
 RESUME_MODEL: 
 RESUME_OPTIMIZER: False # True
-RESUME_SCHEDULER: Falses # True
+RESUME_SCHEDULER: False # True
 RESUME_STATES: False # True
+
+DETR_REFER_LOSSS_COEF: 2.0
 
 EPOCHS: 45
 SCHEDULER_MILESTONES: [30, 40, ]
