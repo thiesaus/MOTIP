@@ -51,7 +51,7 @@ class MOTIP(nn.Module):
         self.detr_bbox_loss_coef = config["DETR_BBOX_LOSS_COEF"]
         self.detr_giou_loss_coef = config["DETR_GIOU_LOSS_COEF"]
         # add prompt
-        self.detr_refer_loss_coef = config["DETR_REFER_LOSSS_COEF"]
+        self.detr_refer_loss_coef = config["DETR_REFER_LOSS_COEF"]
 
         self.detr_set_cost_class = config["DETR_CLS_LOSS_COEF"] if "DETR_SET_COST_CLASS" not in config else config["DETR_SET_COST_CLASS"]
         self.detr_set_cost_bbox = config["DETR_BBOX_LOSS_COEF"] if "DETR_SET_COST_BBOX" not in config else config["DETR_SET_COST_BBOX"]
