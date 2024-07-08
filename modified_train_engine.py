@@ -222,6 +222,9 @@ def train_one_epoch(config: dict, model: MOTIP, logger: Logger,
         # prepare some meta info
         num_gts = sum([len(info["boxes"]) for info in batch["infos"][0]])
 
+        if num_gts < 1:
+            continue
+
         B, T = len(batch["images"]), len(batch["images"][0])
         detr_num_train_frames = min(detr_num_train_frames, T)
         frames = batch["nested_tensors"]    # (B, T, C, H, W) for tensors
@@ -272,8 +275,6 @@ def train_one_epoch(config: dict, model: MOTIP, logger: Logger,
                                            sentences=batch["sentences"])
         else:
             detr_train_outputs = None
-        
-        import pdb; pdb.set_trace()
 
         if T > detr_num_train_frames:
             detr_outputs = combine_detr_outputs(detr_train_outputs, detr_no_grad_outputs)
@@ -397,7 +398,7 @@ def generate_match_instances(match_idxs, infos, detr_outputs):
             flat_idx = b * T + t
             output_idxs, info_idxs = match_idxs[flat_idx]
             instances = Instances(image_size=(0, 0))
-            instances.ids = infos[b][t]["ids"][info_idxs]
+            instances.ids = infos[b][t]["obj_ids"][info_idxs]
             instances.gt_boxes = infos[b][t]["boxes"][info_idxs]
             instances.pred_boxes = detr_outputs["pred_boxes"][flat_idx][output_idxs]
             instances.outputs = detr_outputs["outputs"][flat_idx][output_idxs]
