@@ -196,6 +196,8 @@ def train_one_epoch(config: dict, model: MOTIP, logger: Logger,
 
     device = torch.device(config["DEVICE"])
 
+    multi_checkpoint = "MULTI_CHECKPOINT" in config and config["MULTI_CHECKPOINT"]
+
     # Check train stage:
     assert config["TRAIN_STAGE"] in ["only_detr", "only_decoder", "joint"], \
         f"Illegal train stage '{config['TRAIN_STAGE']}'."
@@ -372,6 +374,13 @@ def train_one_epoch(config: dict, model: MOTIP, logger: Logger,
                 prompt=f"[Epoch: {epoch}] [{i}/{len(dataloader)}] [tps: {tps.average:.2f}s] ",
                 global_step=states["global_iter"],
             )
+            
+        if multi_checkpoint:
+            if (i % config["OUTPUTS_PER_STEP"] == 0) or (i == len(dataloader) - 1):
+                save_checkpoint(model=model,
+                                path=os.path.join(config["OUTPUTS_DIR"], f"checkpoint_multi_ep{epoch}.pth"),
+                                only_detr=config["TRAIN_STAGE"] == "only_detr")
+            
 
         states["global_iter"] += 1
 
